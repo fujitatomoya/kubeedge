@@ -265,6 +265,17 @@ func (md *messageDispatcher) enqueueAckMessage(nodeID string, msg *beehivemodel.
 		return
 	}
 
+	klog.Errorf("MessageRoute.Resource: %s", msg.GetResource())
+	resourceType, _ := messagelayer.GetResourceType(*msg)
+	if resourceType == beehivemodel.ResourceTypeNamespace {
+		resourceNamespace = resourceName
+	}
+	klog.Errorf("resourceNamespace original: %s", resourceNamespace)
+	if resourceType != beehivemodel.ResourceTypeNode && resourceNamespace == "null" {
+		resourceNamespace = "default"
+	}
+	klog.Errorf("resourceNamespace: %s", resourceNamespace)
+
 	objectSyncName := synccontroller.BuildObjectSyncName(nodeID, resourceUID)
 	objectSync, err := md.objectSyncLister.ObjectSyncs(resourceNamespace).Get(objectSyncName)
 
@@ -295,6 +306,7 @@ func (md *messageDispatcher) enqueueAckMessage(nodeID string, msg *beehivemodel.
 			ObjectSyncs(resourceNamespace).
 			Create(context.Background(), objectSync, metav1.CreateOptions{})
 		if err != nil {
+			klog.ErrorS(err, "MessageRoute.Resource", "resource", msg.GetResource())
 			klog.ErrorS(err, "Failed to create objectSync",
 				"objectSyncName", objectSyncName,
 				"resourceNamespace", resourceNamespace,

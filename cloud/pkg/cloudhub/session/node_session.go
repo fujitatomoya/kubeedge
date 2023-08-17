@@ -386,6 +386,16 @@ func (ns *NodeSession) saveSuccessPoint(msg *beehivemodel.Message) {
 			return
 		}
 
+		klog.Errorf("MessageRoute.Resource: %s", msg.GetResource())
+		if resourceType == beehivemodel.ResourceTypeNamespace {
+			resourceNamespace = resourceName
+		}
+		klog.Errorf("resourceNamespace original: %s", resourceNamespace)
+		if resourceType != beehivemodel.ResourceTypeNode && resourceNamespace == "null" {
+			resourceNamespace = "default"
+		}
+		klog.Errorf("resourceNamespace: %s", resourceNamespace)
+
 		objectSyncName := synccontroller.BuildObjectSyncName(ns.nodeID, resourceUID)
 
 		if msg.GetOperation() == beehivemodel.DeleteOperation {

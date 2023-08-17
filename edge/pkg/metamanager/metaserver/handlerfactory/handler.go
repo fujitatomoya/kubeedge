@@ -49,6 +49,38 @@ func NewFactory() *Factory {
 	return &f
 }
 
+func (f *Factory) Version() http.Handler {
+	if h, ok := f.getHandler("version"); ok {
+		return h
+	}
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		result := []byte("{\"major\":\"1\", \"minor\":\"22\", \"gitVersion\":\"v1.22.17\", \"gitCommit\":\"a7736eaf34d823d7652415337ac0ad06db9167fc\", \"gitTreeState\":\"clean\", \"buildDate\":\"2022-12-08T11:42:04Z\", \"goVersion\":\"go1.16.15\", \"compiler\":\"gc\", \"platform\":\"linux/amd64\"}")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
+	})
+	f.handlers["version"] = h
+	return h
+}
+
+func (f *Factory) Healthz() http.Handler {
+	if h, ok := f.getHandler("healthz"); ok {
+		return h
+	}
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		result := []byte("ok")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
+	})
+	f.handlers["healthz"] = h
+	return h
+}
+
 func (f *Factory) Get() http.Handler {
 	if h, ok := f.getHandler("get"); ok {
 		return h

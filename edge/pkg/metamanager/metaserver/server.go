@@ -196,6 +196,14 @@ func (ls *MetaServer) BuildBasicHandler() http.Handler {
 			}
 			return
 		}
+		if ok && !reqInfo.IsResourceRequest && reqInfo.Verb == "get" && reqInfo.Path == "/version" {
+			ls.Factory.Version().ServeHTTP(w, req)
+			return
+		}
+		if ok && !reqInfo.IsResourceRequest && reqInfo.Verb == "get" && reqInfo.Path == "/healthz" {
+			ls.Factory.Healthz().ServeHTTP(w, req)
+			return
+		}
 
 		err := fmt.Errorf("not a resource req")
 		responsewriters.ErrorNegotiated(errors.NewInternalError(err), ls.NegotiatedSerializer, schema.GroupVersion{}, w, req)

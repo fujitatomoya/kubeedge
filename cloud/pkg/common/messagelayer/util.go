@@ -62,6 +62,9 @@ func BuildResource(nodeID, namespace, resourceType, resourceID string) (resource
 func getElementByIndex(msg model.Message, index int) string {
 	sli := strings.Split(msg.GetResource(), constants.ResourceSep)
 	if len(sli) <= index {
+		if index == ResourceResourceTypeIndex {
+			return "node"
+		}
 		return ""
 	}
 	return sli[index]
